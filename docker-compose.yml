@@ -2,8 +2,8 @@ services:
   app:
     build: .
     ports:
-      - "8007:8007"
+      - "8008:8008"
     environment:
-      PORT: 8007
+      PORT: 8008
     env_file: .env
     restart: unless-stopped
