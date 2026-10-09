@@ -25,7 +25,7 @@ services:
       - key: APP_KEY
         sync: false
       - key: APP_URL
-        value: https://examen.onrender.com
+        value: https://examen-8f07.onrender.com
       - key: DB_CONNECTION
         value: pgsql
       - key: DB_HOST
