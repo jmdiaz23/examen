@@ -2,12 +2,22 @@
 
 use App\Http\Controllers\ExamController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\PublicExamController;
 use App\Http\Controllers\QuestionController;
 use App\Http\Controllers\ResultController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return redirect()->route('dashboard');
+});
+
+Route::prefix('examen/{exam}')->group(function () {
+    Route::get('/', [PublicExamController::class, 'show'])->name('public.exam.show');
+    Route::post('iniciar', [PublicExamController::class, 'start'])->name('public.exam.start');
+    Route::get('intento/{attempt}', [PublicExamController::class, 'take'])->name('public.exam.take');
+    Route::post('intento/{attempt}/responder', [PublicExamController::class, 'answer'])->name('public.exam.answer');
+    Route::post('intento/{attempt}/enviar', [PublicExamController::class, 'submit'])->name('public.exam.submit');
+    Route::get('intento/{attempt}/resultado', [PublicExamController::class, 'result'])->name('public.exam.result');
 });
 
 Route::middleware(['auth', 'verified'])->group(function () {
