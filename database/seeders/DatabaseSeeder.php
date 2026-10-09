@@ -15,11 +15,11 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        User::updateOrCreate(
-            ['email' => 'admin@examen.test'],
+        User::firstOrCreate(
+            ['email' => config('admin.email')],
             [
-                'name' => 'Administrador',
-                'password' => bcrypt('password'),
+                'name' => config('admin.name'),
+                'password' => bcrypt(config('admin.password')),
                 'email_verified_at' => now(),
             ]
         );
