@@ -5,6 +5,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PublicExamController;
 use App\Http\Controllers\QuestionController;
 use App\Http\Controllers\ResultController;
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -33,6 +34,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get('exams/{exam}/results', [ResultController::class, 'index'])->name('results.index');
     Route::get('exams/{exam}/results/{attempt}', [ResultController::class, 'show'])->name('results.show');
+
+    Route::get('users', [UserController::class, 'index'])->name('users.index');
+    Route::get('users/create', [UserController::class, 'create'])->name('users.create');
+    Route::post('users', [UserController::class, 'store'])->name('users.store');
+    Route::delete('users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
 });
 
 Route::middleware('auth')->group(function () {

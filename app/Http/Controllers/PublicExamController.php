@@ -24,7 +24,9 @@ class PublicExamController extends Controller
 
     public function start(Request $request, Exam $exam): RedirectResponse
     {
-        abort_unless($exam->is_active, 403);
+        if (! $exam->is_active) {
+            return redirect()->route('public.exam.show', $exam);
+        }
 
         $data = $request->validate([
             'full_name' => ['required', 'string', 'max:255'],
@@ -167,9 +169,23 @@ class PublicExamController extends Controller
         ]);
     }
 
-    public function submit(Exam $exam, Attempt $attempt): RedirectResponse
+    public function submit(Request $request, Exam $exam, Attempt $attempt): RedirectResponse
     {
         $this->ensureOwnership($exam, $attempt);
+
+        $auto = $request->boolean('auto');
+
+        if (! $auto && ! $attempt->isFinished()) {
+            $questionIds = $attempt->question_ids ?? [];
+            $answered = $attempt->answers()->whereIn('question_id', $questionIds)->count();
+            $total = count($questionIds);
+
+            if ($answered < $total) {
+                return redirect()
+                    ->route('public.exam.take', [$exam, $attempt])
+                    ->withErrors(['respuestas' => 'Debes responder todas las preguntas antes de enviar. Faltan ' . ($total - $answered) . '.']);
+            }
+        }
 
         if (! $attempt->isFinished()) {
             $this->grader->grade($attempt, $attempt->isExpired() ? 'expired' : 'submitted');

@@ -31,6 +31,11 @@ window.examRunner = (config) => ({
     submitting: false,
     saving: false,
     saved: false,
+    modal: false,
+    modalType: null,
+    modalTitle: '',
+    modalMessage: '',
+    modalConfirmText: 'Aceptar',
     get question() {
         return this.questions[this.current];
     },
@@ -39,6 +44,12 @@ window.examRunner = (config) => ({
     },
     get answeredCount() {
         return Object.keys(this.answers).length;
+    },
+    get allAnswered() {
+        return this.questions.every((q) => this.answers[q.id]);
+    },
+    isAnswered(questionId) {
+        return Boolean(this.answers[questionId]);
     },
     isSelected(optionId) {
         return Number(this.answers[this.question.id]) === Number(optionId);
@@ -69,13 +80,17 @@ window.examRunner = (config) => ({
         }
     },
     next() {
-        if (this.current < this.total - 1) this.current++;
+        if (this.current < this.total - 1 && this.isAnswered(this.question.id)) {
+            this.current++;
+        }
     },
     prev() {
         if (this.current > 0) this.current--;
     },
     goTo(index) {
-        this.current = index;
+        if (this.isAnswered(this.questions[index].id)) {
+            this.current = index;
+        }
     },
     formatTime() {
         const minutes = Math.floor(this.remaining / 60);
@@ -86,19 +101,68 @@ window.examRunner = (config) => ({
         setInterval(() => {
             if (this.remaining <= 0) return;
             this.remaining--;
-            if (this.remaining <= 0) this.finish();
+            if (this.remaining <= 0) this.autoSubmit();
         }, 1000);
+    },
+    missingCount() {
+        return this.questions.filter((q) => !this.answers[q.id]).length;
+    },
+    openMissing() {
+        const missing = this.missingCount();
+        this.modalType = 'missing';
+        this.modalTitle = 'Faltan respuestas';
+        this.modalMessage = `Debes responder todas las preguntas antes de enviar. Te faltan ${missing}.`;
+        this.modalConfirmText = 'Entendido';
+        this.modal = true;
+    },
+    openConfirm() {
+        this.modalType = 'confirm';
+        this.modalTitle = 'Enviar examen';
+        this.modalMessage = '¿Seguro que quieres enviar el examen? No podrás volver a presentarlo.';
+        this.modalConfirmText = 'Enviar ahora';
+        this.modal = true;
+    },
+    openTimeUp() {
+        this.modalType = 'sending';
+        this.modalTitle = 'Tiempo agotado';
+        this.modalMessage = 'Se acabó el tiempo. Estamos enviando tu examen...';
+        this.modalConfirmText = 'Enviando...';
+        this.modal = true;
+    },
+    closeModal() {
+        if (this.modalType === 'sending' || this.submitting) return;
+        this.modal = false;
+    },
+    modalConfirm() {
+        if (this.modalType === 'missing') {
+            this.modal = false;
+            return;
+        }
+        if (this.modalType === 'confirm') {
+            this.modal = false;
+            this.doSubmit();
+        }
+    },
+    doSubmit(auto = false) {
+        if (this.submitting) return;
+        this.submitting = true;
+        document.getElementById('exam-autosubmit').value = auto ? '1' : '0';
+        document.getElementById('exam-submit-form').submit();
     },
     finish() {
         if (this.submitting) return;
-        if (!confirm('¿Seguro que quieres enviar el examen? No podrás volver a presentarlo.')) {
-            if (this.remaining <= 0) {
-                document.getElementById('exam-submit-form').submit();
-            }
+
+        if (this.missingCount() > 0) {
+            this.openMissing();
             return;
         }
-        this.submitting = true;
-        document.getElementById('exam-submit-form').submit();
+
+        this.openConfirm();
+    },
+    autoSubmit() {
+        if (this.submitting) return;
+        this.openTimeUp();
+        setTimeout(() => this.doSubmit(true), 1500);
     },
 });
 

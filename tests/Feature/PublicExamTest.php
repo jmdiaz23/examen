@@ -116,7 +116,45 @@ class PublicExamTest extends TestCase
             'full_name' => 'Ana',
             'semester' => '1',
             'email' => 'ana@example.com',
-        ])->assertForbidden();
+        ])->assertRedirect(route('public.exam.show', $exam));
+
+        $this->assertSame(0, Attempt::count());
+    }
+
+    public function test_manual_submit_is_blocked_while_answers_are_missing(): void
+    {
+        $exam = $this->makeExam(10, 5);
+        $attempt = $this->startAttempt($exam);
+
+        $question = $exam->questions()->with('options')->whereIn('id', $attempt->question_ids)->first();
+        $correct = $question->options->firstWhere('is_correct', true);
+
+        $this->postJson("/examen/{$exam->uuid}/intento/{$attempt->uuid}/responder", [
+            'question_id' => $question->id,
+            'option_id' => $correct->id,
+        ])->assertOk();
+
+        $this->from(route('public.exam.take', [$exam, $attempt]))
+            ->post("/examen/{$exam->uuid}/intento/{$attempt->uuid}/enviar", ['auto' => '0'])
+            ->assertRedirect(route('public.exam.take', [$exam, $attempt]))
+            ->assertSessionHasErrors('respuestas');
+
+        $attempt->refresh();
+        $this->assertSame('started', $attempt->status);
+        $this->assertNull($attempt->score);
+    }
+
+    public function test_auto_submit_grades_even_with_missing_answers(): void
+    {
+        $exam = $this->makeExam(10, 5);
+        $attempt = $this->startAttempt($exam);
+
+        $this->post("/examen/{$exam->uuid}/intento/{$attempt->uuid}/enviar", ['auto' => '1'])
+            ->assertRedirect(route('public.exam.result', [$exam, $attempt]));
+
+        $attempt->refresh();
+        $this->assertSame('submitted', $attempt->status);
+        $this->assertSame(0, $attempt->score);
     }
 
     public function test_expired_attempt_is_graded_automatically(): void

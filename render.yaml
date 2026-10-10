@@ -22,6 +22,8 @@ services:
         value: "false"
       - key: APP_LOCALE
         value: es
+      - key: APP_TIMEZONE
+        value: America/Bogota
       - key: APP_KEY
         sync: false
       - key: APP_URL
