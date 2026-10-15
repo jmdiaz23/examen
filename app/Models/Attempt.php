@@ -6,11 +6,12 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
 
 class Attempt extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     protected $fillable = [
         'exam_id',
@@ -35,6 +36,7 @@ class Attempt extends Model
         'score' => 'integer',
         'total_questions' => 'integer',
         'question_ids' => 'array',
+        'deleted_at' => 'datetime',
     ];
 
     protected static function booted(): void

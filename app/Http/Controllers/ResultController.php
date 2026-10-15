@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Attempt;
 use App\Models\Exam;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 
 class ResultController extends Controller
@@ -35,5 +36,17 @@ class ResultController extends Controller
         $attempt->load(['answers.question.options', 'answers.option']);
 
         return view('results.show', compact('exam', 'attempt'));
+    }
+
+    public function resetAttempt(Exam $exam, Attempt $attempt): RedirectResponse
+    {
+        abort_unless($attempt->exam_id === $exam->id, 404);
+
+        $attempt->answers()->delete();
+        $attempt->delete();
+
+        return redirect()
+            ->route('results.index', $exam)
+            ->with('status', 'Intento reseteado correctamente. El alumno puede volver a presentarlo.');
     }
 }

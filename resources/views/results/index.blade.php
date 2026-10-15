@@ -67,8 +67,20 @@
                                             @endif
                                         </td>
                                         <td class="py-3 pl-4 text-right">
-                                            <a href="{{ route('results.show', [$exam, $attempt]) }}"
-                                               class="text-xs text-indigo-600 hover:text-indigo-900 underline">Ver</a>
+                                        <a href="{{ route('results.show', [$exam, $attempt]) }}"
+                                           class="inline-flex items-center px-3 py-1 rounded-md text-xs font-medium bg-gray-800 text-white hover:bg-gray-700">
+                                            Ver
+                                        </a>
+                                        <form method="POST" action="{{ route('results.reset', [$exam, $attempt]) }}"
+                                              class="inline"
+                                              onsubmit="return confirm('¿Resetear este intento? Se archivará (borrado lógico) y el alumno podrá volver a presentarlo.');">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit"
+                                                    class="inline-flex items-center px-3 py-1 rounded-md text-xs font-medium border border-red-300 text-red-700 hover:bg-red-50">
+                                                Resetear
+                                            </button>
+                                        </form>
                                         </td>
                                     </tr>
                                 @endforeach

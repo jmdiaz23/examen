@@ -22,6 +22,8 @@ class Exam extends Model
         'passing_score',
         'show_correct_answers',
         'is_active',
+        'available_from',
+        'available_until',
     ];
 
     protected $casts = [
@@ -32,6 +34,8 @@ class Exam extends Model
         'passing_score' => 'integer',
         'show_correct_answers' => 'boolean',
         'is_active' => 'boolean',
+        'available_from' => 'datetime',
+        'available_until' => 'datetime',
     ];
 
     protected static function booted(): void
@@ -56,5 +60,35 @@ class Exam extends Model
     public function attempts(): HasMany
     {
         return $this->hasMany(Attempt::class);
+    }
+
+    public function isWithinAvailabilityWindow(): bool
+    {
+        $now = now();
+
+        if ($this->available_from && $now->lt($this->available_from)) {
+            return false;
+        }
+
+        if ($this->available_until && $now->gt($this->available_until)) {
+            return false;
+        }
+
+        return true;
+    }
+
+    public function availabilityReason(): ?string
+    {
+        $now = now();
+
+        if ($this->available_from && $now->lt($this->available_from)) {
+            return 'Este examen estará disponible a partir del ' . $this->available_from->timezone(config('app.timezone'))->format('d/m/Y H:i');
+        }
+
+        if ($this->available_until && $now->gt($this->available_until)) {
+            return 'Este examen cerró el ' . $this->available_until->timezone(config('app.timezone'))->format('d/m/Y H:i');
+        }
+
+        return null;
     }
 }

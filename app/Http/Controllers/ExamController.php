@@ -73,12 +73,22 @@ class ExamController extends Controller
             'shuffle_options' => ['nullable', 'boolean'],
             'show_correct_answers' => ['nullable', 'boolean'],
             'is_active' => ['nullable', 'boolean'],
+            'available_from' => ['nullable', 'date'],
+            'available_until' => ['nullable', 'date', 'after_or_equal:available_from'],
         ]);
 
         $data['shuffle_questions'] = $request->boolean('shuffle_questions');
         $data['shuffle_options'] = $request->boolean('shuffle_options');
         $data['show_correct_answers'] = $request->boolean('show_correct_answers');
         $data['is_active'] = $request->boolean('is_active');
+
+        if (! $request->filled('available_from')) {
+            $data['available_from'] = null;
+        }
+
+        if (! $request->filled('available_until')) {
+            $data['available_until'] = null;
+        }
 
         return $data;
     }

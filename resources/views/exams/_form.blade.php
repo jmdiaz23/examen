@@ -61,4 +61,19 @@
             <span class="ms-2 text-sm text-gray-700">Examen activo (recibe respuestas)</span>
         </label>
     </div>
+
+    <div class="mt-4">
+        <x-input-label for="available_from" value="Disponible desde (opcional)" />
+        <x-text-input id="available_from" name="available_from" type="datetime-local" class="mt-1 block w-full"
+                      :value="old('available_from', optional($exam->available_from)->format('Y-m-d\TH:i'))" />
+        <x-input-error :messages="$errors->get('available_from')" class="mt-2" />
+    </div>
+
+    <div class="mt-4">
+        <x-input-label for="available_until" value="Disponible hasta (opcional)" />
+        <x-text-input id="available_until" name="available_until" type="datetime-local" class="mt-1 block w-full"
+                      :value="old('available_until', optional($exam->available_until)->format('Y-m-d\TH:i'))" />
+        <x-input-error :messages="$errors->get('available_until')" class="mt-2" />
+        <p class="mt-1 text-xs text-gray-500">Zona horaria {{ config('app.timezone') }}.</p>
+    </div>
 </div>

@@ -34,6 +34,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get('exams/{exam}/results', [ResultController::class, 'index'])->name('results.index');
     Route::get('exams/{exam}/results/{attempt}', [ResultController::class, 'show'])->name('results.show');
+    Route::delete('exams/{exam}/results/{attempt}', [ResultController::class, 'resetAttempt'])->name('results.reset');
 
     Route::get('users', [UserController::class, 'index'])->name('users.index');
     Route::get('users/create', [UserController::class, 'create'])->name('users.create');

@@ -17,7 +17,11 @@
                 </div>
             </dl>
 
-            @if (! $exam->is_active)
+            @if (isset($message) && $message)
+                <div class="mt-5 p-4 bg-amber-100 text-amber-800 rounded-md text-sm">
+                    {{ $message }}
+                </div>
+            @elseif (! $exam->is_active)
                 <div class="mt-5 p-4 bg-amber-100 text-amber-800 rounded-md text-sm">
                     Este examen no está disponible en este momento.
                 </div>

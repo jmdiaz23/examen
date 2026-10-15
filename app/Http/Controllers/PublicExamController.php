@@ -17,14 +17,26 @@ class PublicExamController extends Controller
 {
     public function __construct(private readonly ExamGrader $grader) {}
 
-    public function show(Exam $exam): View
+    public function show(Exam $exam): View|RedirectResponse
     {
+        if (! $exam->is_active) {
+            return view('public.show', ['exam' => $exam, 'message' => 'Este examen no está disponible en este momento.']);
+        }
+
+        if (! $exam->isWithinAvailabilityWindow()) {
+            return view('public.show', ['exam' => $exam, 'message' => $exam->availabilityReason()]);
+        }
+
         return view('public.show', compact('exam'));
     }
 
     public function start(Request $request, Exam $exam): RedirectResponse
     {
         if (! $exam->is_active) {
+            return redirect()->route('public.exam.show', $exam);
+        }
+
+        if (! $exam->isWithinAvailabilityWindow()) {
             return redirect()->route('public.exam.show', $exam);
         }
 
@@ -36,7 +48,12 @@ class PublicExamController extends Controller
 
         $email = strtolower(trim($data['email']));
 
-        if ($exam->attempts()->where('email', $email)->exists()) {
+        $existsActive = $exam->attempts()
+            ->where('email', $email)
+            ->whereNull('deleted_at')
+            ->exists();
+
+        if ($existsActive) {
             return back()
                 ->withInput()
                 ->withErrors(['email' => 'Este correo ya presentó este examen. Solo se permite un intento.']);

@@ -5,10 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class AttemptAnswer extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     protected $fillable = [
         'attempt_id',
@@ -21,6 +22,7 @@ class AttemptAnswer extends Model
     protected $casts = [
         'is_correct' => 'boolean',
         'answered_at' => 'datetime',
+        'deleted_at' => 'datetime',
     ];
 
     public function attempt(): BelongsTo
